@@ -12,7 +12,6 @@ import (
 	"github.com/echewisi/ecommerce_api/services"
 	"github.com/echewisi/ecommerce_api/repositories"
 
-	_ "ecommerce-api/docs" // Import generated Swagger docs
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/files"
 )
@@ -20,10 +19,8 @@ import (
 // @title E-Commerce API
 // @version 1.0
 // @description This is a RESTful API for managing an e-commerce application.
-// @termsOfService http://example.com/terms/
 
 // @contact.name API Support
-// @contact.url http://example.com/contact
 // @contact.email support@example.com
 
 // @license.name MIT
@@ -32,7 +29,7 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
-	// Load configuration and initialize database
+	// Load configuration
 	config := config.LoadConfig()
 
 	// Initialize database connection using GORM
@@ -41,11 +38,17 @@ func main() {
 		log.Fatalf("Failed to connect to the database: %v", err)
 	}
 
-	// Initialize services and controllers
-	authService := services.NewAuthService(repositories.NewUserRepository(db), config.JWTKey)
-	productService := services.NewProductService(repositories.NewProductRepository(db))
-	orderService := services.NewOrderService(repositories.NewOrderRepository(db), repositories.NewProductRepository(db))
+	// Initialize repositories
+	userRepo := repositories.NewUserRepository(db)
+	productRepo := repositories.NewProductRepository(db)
+	orderRepo := repositories.NewOrderRepository(db)
 
+	// Initialize services
+	authService := services.NewAuthService(userRepo, config.JWTKey)
+	productService := services.NewProductService(productRepo)
+	orderService := services.NewOrderService(orderRepo, productRepo)
+
+	// Initialize controllers
 	controllers := struct {
 		Auth    *controllers.AuthController
 		Product *controllers.ProductController
@@ -62,6 +65,11 @@ func main() {
 
 	// Swagger UI route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Serve static Swagger JSON if manually defined
+	router.GET("/swagger/swagger.json", func(c *gin.Context) {
+		c.File("./docs/swagger.json")
+	})
 
 	// Start the server
 	port := os.Getenv("PORT")
