@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"net/http"
+	_"net/http"
 
 	"github.com/gin-gonic/gin"
 )
