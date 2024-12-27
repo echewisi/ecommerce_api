@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"strconv"
 	"github.com/echewisi/ecommerce_api/models"
 	"github.com/echewisi/ecommerce_api/services"
 )
@@ -52,10 +52,17 @@ func (oc *OrderController) CancelOrder(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Order canceled successfully"})
 }
 
-// parseUint is a helper function to parse uint from string
-func parseUint(s string) uint {
-	value, _ := strconv.ParseUint(s, 10, 32)
-	return uint(value)
+// GetUserOrders retrieves all orders for the authenticated user
+func (oc *OrderController) GetUserOrders(c *gin.Context) {
+	userID, _ := c.Get("userID")
+
+	orders, err := oc.OrderService.GetUserOrders(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve orders"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"orders": orders})
 }
 
 // UpdateOrder handles updating the status or details of an order
@@ -80,3 +87,8 @@ func (oc *OrderController) UpdateOrder(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Order updated successfully"})
 }
 
+// parseUint is a helper function to parse uint from string
+func parseUint(s string) uint {
+	value, _ := strconv.ParseUint(s, 10, 32)
+	return uint(value)
+}

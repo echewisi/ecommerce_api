@@ -1,23 +1,18 @@
 package database
 
 import (
-	"database/sql"
 	"log"
 
-	_ "github.com/lib/pq" // PostgreSQL driver
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func ConnectDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", dsn)
+func ConnectDB(dsn string) (*gorm.DB, error) {
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
 
-	// Verify the connection
-	if err := db.Ping(); err != nil {
-		return nil, err
-	}
-
-	log.Println("Successfully connected to the database")
+	log.Println("Database connection established")
 	return db, nil
 }
