@@ -63,14 +63,13 @@ func main() {
 	router := gin.Default()
 	routes.InitRoutes(router, config.JWTKey, controllers)
 
-	// Swagger UI route
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	// // Serve static Swagger JSON if manually defined
+	// Serve your manually created Swagger JSON file
 	// router.GET("/swagger/swagger.json", func(c *gin.Context) {
-	// 	c.File("./docs/swagger.json")
+	// 	c.File("../docs/swagger.json") 
 	// })
 
+	// Configure Swagger UI to use your custom Swagger JSON file
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/docs/swagger.json")))
 	// Start the server
 	port := os.Getenv("PORT")
 	if port == "" {
