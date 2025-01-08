@@ -5,16 +5,17 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 )
 
 type Claims struct {
-	UserID    uint   `json:"user_id"`
-	IsAdmin   bool   `json:"is_admin"`
+	UserID  uuid.UUID `json:"user_id"`
+	IsAdmin bool `json:"is_admin"`
 	jwt.StandardClaims
 }
 
 // GenerateToken generates a new JWT token for the user
-func GenerateToken(userID uint, isAdmin bool, secret string) (string, error) {
+func GenerateToken(userID uuid.UUID, isAdmin bool, secret string) (string, error) {
 	claims := &Claims{
 		UserID:  userID,
 		IsAdmin: isAdmin,

@@ -1,8 +1,10 @@
 package repositories
 
 import (
-	"github.com/echewisi/ecommerce_api/models"
 	"errors"
+
+	"github.com/echewisi/ecommerce_api/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -21,16 +23,16 @@ func (r *OrderRepository) CreateOrder(order *models.Order) error {
 }
 
 // GetOrdersByUserID fetches orders for a specific user
-func (r *OrderRepository) GetOrdersByUserID(userID uint) ([]models.Order, error) {
+func (r *OrderRepository) GetOrdersByUserID(userID uuid.UUID) ([]models.Order, error) {
 	var orders []models.Order
 	err := r.DB.Where("user_id = ?", userID).Preload("Products").Find(&orders).Error
 	return orders, err
 }
 
 // FindOrderByID fetches an order by ID
-func (r *OrderRepository) FindOrderByID(id uint) (*models.Order, error) {
+func (r *OrderRepository) FindOrderByID(id uuid.UUID) (*models.Order, error) {
 	var order models.Order
-	err := r.DB.Preload("Products").First(&order, id).Error
+	err := r.DB.Preload("Products").First(&order, "id = ?", id).Error
 	return &order, err
 }
 
@@ -40,9 +42,9 @@ func (r *OrderRepository) UpdateOrder(order *models.Order) error {
 }
 
 // CancelOrder cancels an order if its status is "Pending"
-func (r *OrderRepository) CancelOrder(orderID uint) error {
+func (r *OrderRepository) CancelOrder(orderID uuid.UUID) error {
 	var order models.Order
-	err := r.DB.First(&order, orderID).Error
+	err := r.DB.First(&order, "id = ?", orderID).Error
 	if err != nil {
 		return err
 	}

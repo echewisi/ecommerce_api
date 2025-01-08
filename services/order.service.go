@@ -2,8 +2,10 @@ package services
 
 import (
 	"errors"
+
 	"github.com/echewisi/ecommerce_api/models"
 	"github.com/echewisi/ecommerce_api/repositories"
+	"github.com/google/uuid"
 )
 
 type OrderService struct {
@@ -17,7 +19,7 @@ func NewOrderService(orderRepo *repositories.OrderRepository, productRepo *repos
 }
 
 // PlaceOrder places a new order
-func (s *OrderService) PlaceOrder(userID uint, items []models.OrderItem) (*models.Order, error) {
+func (s *OrderService) PlaceOrder(userID uuid.UUID, items []models.OrderItem) (*models.Order, error) {
 	var totalAmount float64
 
 	// Validate product availability and calculate total
@@ -46,12 +48,12 @@ func (s *OrderService) PlaceOrder(userID uint, items []models.OrderItem) (*model
 }
 
 // CancelOrder cancels an order if it's in "Pending" status
-func (s *OrderService) CancelOrder(orderID uint) error {
+func (s *OrderService) CancelOrder(orderID uuid.UUID) error {
 	return s.OrderRepo.CancelOrder(orderID)
 }
 
 // GetUserOrders retrieves all orders for a user
-func (s *OrderService) GetUserOrders(userID uint) ([]models.Order, error) {
+func (s *OrderService) GetUserOrders(userID uuid.UUID) ([]models.Order, error) {
 	return s.OrderRepo.GetOrdersByUserID(userID)
 }
 
@@ -68,4 +70,3 @@ func (s *OrderService) UpdateOrder(order *models.Order) error {
 	existingOrder.TotalAmount = order.TotalAmount // Optional if the total amount needs updates
 	return s.OrderRepo.UpdateOrder(existingOrder)
 }
-

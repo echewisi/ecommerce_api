@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/echewisi/ecommerce_api/models"
 	"github.com/echewisi/ecommerce_api/repositories"
+	"github.com/google/uuid"
 )
 
 type ProductService struct {
@@ -25,16 +26,29 @@ func (s *ProductService) GetAllProducts() ([]models.Product, error) {
 }
 
 // GetProductByID retrieves a single product by ID
-func (s *ProductService) GetProductByID(id uint) (*models.Product, error) {
+func (s *ProductService) GetProductByID(id uuid.UUID) (*models.Product, error) {
 	return s.ProductRepo.FindProductByID(id)
 }
 
 // UpdateProduct updates an existing product
-func (s *ProductService) UpdateProduct(product *models.Product) error {
-	return s.ProductRepo.UpdateProduct(product)
+func (ps *ProductService) UpdateProduct(product *models.Product) error {
+	// Assuming you have a repository that handles the database update
+	err := ps.ProductRepo.UpdateProduct(product)
+	if err != nil {
+		return err
+	}
+	// Retrieve the updated product from the database after the update
+	updatedProduct, err := ps.ProductRepo.FindProductByID(product.ID)
+	if err != nil {
+		return err
+	}
+
+	// Update the product object with the latest data
+	*product = *updatedProduct
+	return nil
 }
 
 // DeleteProduct removes a product by ID
-func (s *ProductService) DeleteProduct(id uint) error {
+func (s *ProductService) DeleteProduct(id uuid.UUID) error {
 	return s.ProductRepo.DeleteProduct(id)
 }

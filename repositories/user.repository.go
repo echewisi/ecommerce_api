@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"github.com/echewisi/ecommerce_api/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -27,8 +28,8 @@ func (r *UserRepository) FindUserByEmail(email string) (*models.User, error) {
 }
 
 // FindUserByID fetches a user by ID
-func (r *UserRepository) FindUserByID(id uint) (*models.User, error) {
+func (r *UserRepository) FindUserByID(id uuid.UUID) (*models.User, error) {
 	var user models.User
-	err := r.DB.First(&user, id).Error
+	err := r.DB.First(&user, "id = ?", id).Error
 	return &user, err
 }

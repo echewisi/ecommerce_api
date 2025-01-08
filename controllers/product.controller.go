@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/echewisi/ecommerce_api/models"
 	"github.com/echewisi/ecommerce_api/services"
+	"github.com/google/uuid"
 )
 
 type ProductController struct {
@@ -30,6 +30,11 @@ func (pc *ProductController) CreateProduct(c *gin.Context) {
 	if err := c.ShouldBindJSON(&product); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Generate a new UUID for the product if not already provided
+	if product.ID == uuid.Nil {
+		product.ID = uuid.New()
 	}
 
 	if err := pc.ProductService.CreateProduct(&product); err != nil {
@@ -59,26 +64,31 @@ func (pc *ProductController) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	productID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	// Parse the product ID from the URL
+	productID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
 		return
 	}
 
+	// Bind the product JSON request to the product object
 	var product models.Product
 	if err := c.ShouldBindJSON(&product); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	product.ID = uint(productID)
+	product.ID = productID
 
+	// Call the service to update the product
 	if err := pc.ProductService.UpdateProduct(&product); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update product"})
 		return
 	}
 
+	// Return the updated product in the response
 	c.JSON(http.StatusOK, gin.H{"message": "Product updated successfully", "product": product})
 }
+
 
 // DeleteProduct handles deleting a product (Admin only)
 func (pc *ProductController) DeleteProduct(c *gin.Context) {
@@ -88,13 +98,13 @@ func (pc *ProductController) DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	productID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	productID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
 		return
 	}
 
-	if err := pc.ProductService.DeleteProduct(uint(productID)); err != nil {
+	if err := pc.ProductService.DeleteProduct(productID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete product"})
 		return
 	}
